@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Activity Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: auto;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .dashboard {
+      margin-top: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 8px;
+      text-align: left;
+    }
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        padding: 10px;
+        border: none;
+        border-bottom: 1px solid #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>User Activity Tracker</h1>
+  <p>Interact with this page (scroll, click anywhere, stay for a while), then see the metrics below.</p>
+
+  <div class="dashboard">
+    <h2>Metrics Dashboard</h2>
+    <table id="metricsTable">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Clicks</td><td id="clicks">0</td></tr>
+        <tr><td>Scrolls</td><td id="scrolls">0</td></tr>
+        <tr><td>Time Spent (s)</td><td id="timeSpent">0</td></tr>
+        <tr><td>Navigation Path</td><td id="navPath">-</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const storageKey = 'userActivityData';
+
+    const activity = {
+      clicks: 0,
+      scrolls: 0,
+      timeSpent: 0,
+      navPath: window.location.pathname
+    };
+
+    // Load existing session data if available
+    const saved = sessionStorage.getItem(storageKey);
+    if (saved) Object.assign(activity, JSON.parse(saved));
+
+    // Click tracking
+    document.addEventListener('click', () => {
+      activity.clicks++;
+      updateDashboard();
+    });
+
+    // Scroll tracking
+    let scrollTimeout;
+    window.addEventListener('scroll', () => {
+      if (!scrollTimeout) {
+        activity.scrolls++;
+        scrollTimeout = setTimeout(() => scrollTimeout = null, 500);
+        updateDashboard();
+      }
+    });
+
+    // Time tracking
+    const startTime = Date.now();
+    setInterval(() => {
+      activity.timeSpent = Math.floor((Date.now() - startTime) / 1000);
+      updateDashboard();
+    }, 1000);
+
+    // Update metrics in UI
+    function updateDashboard() {
+      document.getElementById('clicks').textContent = activity.clicks;
+      document.getElementById('scrolls').textContent = activity.scrolls;
+      document.getElementById('timeSpent').textContent = activity.timeSpent;
+      document.getElementById('navPath').textContent = activity.navPath;
+      sessionStorage.setItem(storageKey, JSON.stringify(activity));
+    }
+
+    // Initial update
+    updateDashboard();
+  </script>
+</body>
+</html>
